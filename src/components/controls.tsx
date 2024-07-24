@@ -8,7 +8,7 @@ import { TooltipProvider } from "@radix-ui/react-tooltip";
 export default function Controls() {
   const { isPlaying, setIsPlaying, reset, digits } = usePlayback();
   return (
-    <div className="bg-clip-padding bg-background backdrop-filter backdrop-blur-sm dark:bg-opacity-80 bg-opacity-80 fixed bottom-0 left-0 z-50 flex justify-center w-full px-8 border-t">
+    <div className="bg-clip-padding bg-background/50 backdrop-filter backdrop-blur-sm bg-opacity-50 fixed bottom-0 left-0 z-50 flex justify-center w-full px-8 border-t">
       <div className="flex items-center w-full py-6">
         <div className="w-full">
           <div className="flex gap-3 items-center justify-center mx-auto mb-1">
