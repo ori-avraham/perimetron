@@ -38,6 +38,7 @@ export default function SettingsProvider({ children }: SettingsProviderProps) {
   const reset = () => {
     setSettings(defaultSettings);
   };
+  
   return (
     <SettingsContext.Provider value={{ settings, setSettings, reset }}>
       {children}

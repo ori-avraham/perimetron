@@ -1,9 +1,31 @@
-import { useState } from "react";
-import { Dialog } from "@headlessui/react";
 import { useSettings } from "@/hooks/use-settings";
+import { Button } from "./ui/button";
+import { MinusIcon, PlusIcon, SettingsIcon } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
+import { Label } from "./ui/label";
+import { Slider } from "./ui/slider";
+import { Badge } from "./ui/badge";
+import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
+import { ScrollArea } from "./ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "./ui/select";
+import { SelectValue } from "@radix-ui/react-select";
 
 export default function SettingsModal() {
-  const [isOpen, setIsOpen] = useState(false);
   const { settings, setSettings, reset } = useSettings();
 
   const decrementSpacing = () => {
@@ -28,29 +50,248 @@ export default function SettingsModal() {
 
   return (
     <div>
-      <button
-        onClick={() => setIsOpen(true)}
-        type="button"
-        className="p-2.5 group rounded-full hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-600 dark:hover:bg-gray-600"
-      >
-        <svg
-          className="w-4 h-4 text-gray-500 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 20 20"
-        >
-          <path
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M4 12.25V1m0 11.25a2.25 2.25 0 0 0 0 4.5m0-4.5a2.25 2.25 0 0 1 0 4.5M4 19v-2.25m6-13.5V1m0 2.25a2.25 2.25 0 0 0 0 4.5m0-4.5a2.25 2.25 0 0 1 0 4.5M10 19V7.75m6 4.5V1m0 11.25a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5ZM16 19v-2"
-          />
-        </svg>
-        <span className="sr-only">Settings</span>
-      </button>
-      <Dialog
+      <Dialog>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  // onClick={reset}
+                  type="button"
+                >
+                  <SettingsIcon className="size-5" />
+                  <span className="sr-only">Open settings</span>
+                </Button>
+              </DialogTrigger>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Open settings</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <DialogContent className="sm:max-w-2xl h-[600px] p-2">
+          <ScrollArea>
+            <div className="p-4 space-y-4">
+              <DialogHeader>
+                <DialogTitle>Perimetron Settings</DialogTitle>
+                <DialogDescription>
+                  Make changes to the settings here. Click save when you're
+                  done.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col gap-6">
+                <Card className="grid items-center gap-2">
+                  <CardHeader>
+                    <Label
+                      className="text-lg font-semibold flex gap-2"
+                      htmlFor="interval"
+                    >
+                      Interval
+                    </Label>
+                    <Badge className="w-fit">{settings.interval}</Badge>
+                  </CardHeader>
+                  <CardContent>
+                    <Slider
+                      className="w-full"
+                      id="interval"
+                      min={50}
+                      step={50}
+                      max={1000}
+                      value={[settings.interval]}
+                      onValueChange={(value) =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          interval: Number(value),
+                        }))
+                      }
+                    />
+                  </CardContent>
+                  <CardFooter>
+                    <p className="mb-3 text-sm text-muted-foreground">
+                      This controls the number of milliseconds between each
+                      digit generated.
+                    </p>
+                  </CardFooter>
+                </Card>
+                <Card className="grid items-center gap-2">
+                  <CardHeader>
+                    <Label
+                      className="text-lg font-semibold flex gap-2"
+                      htmlFor="spacing"
+                    >
+                      Spacing
+                    </Label>
+                    <Badge className="w-fit">{settings.spacing}</Badge>
+                  </CardHeader>
+                  <CardContent className="flex items-center">
+                    <Button
+                      aria-label="Decrease spacing"
+                      onClick={decrementSpacing}
+                      variant="outline"
+                      size="icon"
+                    >
+                      <MinusIcon className="size-5" />
+                    </Button>
+                    <input
+                      id="spacing"
+                      readOnly
+                      className="bg-transparent w-10 text-center"
+                      type="text"
+                      value={settings.spacing}
+                    />
+                    <Button
+                      aria-label="Increase spacing"
+                      onClick={incrementSpacing}
+                      variant="outline"
+                      size="icon"
+                    >
+                      <PlusIcon className="size-5" />
+                    </Button>
+                  </CardContent>
+                  <CardFooter>
+                    <p className="mb-3 text-sm text-muted-foreground">
+                      This will add a gap every N digits; setting it to 0 will
+                      eliminate the spacing entirely.
+                    </p>
+                  </CardFooter>
+                </Card>
+                <Card className="grid items-center gap-2">
+                  <CardHeader>
+                    <Label
+                      className="text-lg font-semibold flex gap-2"
+                      htmlFor="font"
+                    >
+                      Font
+                    </Label>
+                  </CardHeader>
+                  <CardContent className="flex items-center">
+                    <Select
+                      value={settings.font}
+                      onValueChange={(value) =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          font: value,
+                        }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue id="font" placeholder="Select a fruit" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="font-mono">Mono</SelectItem>
+                        <SelectItem value="font-sans">Sans-Serif</SelectItem>
+                        <SelectItem value="font-serif">Serif</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </CardContent>
+                  <CardFooter>
+                    <p className="mb-3 text-sm text-muted-foreground">
+                      This will change the font type of the digits.
+                    </p>
+                  </CardFooter>
+                </Card>
+                <Card className="grid items-center gap-2">
+                  <CardHeader>
+                    <Label
+                      className="text-lg font-semibold flex gap-2"
+                      htmlFor="fontSize"
+                    >
+                      Font Size
+                    </Label>
+                  </CardHeader>
+                  <CardContent className="flex items-center">
+                    <Select
+                      value={settings.fontSize}
+                      onValueChange={(value) =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          fontSize: value,
+                        }))
+                      }
+                    >
+                      <SelectTrigger id="fontSize">
+                        <SelectValue placeholder="Select a fruit" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="text-xs">Extra Small</SelectItem>
+                        <SelectItem value="text-sm">Small</SelectItem>
+                        <SelectItem value="text-base">Medium</SelectItem>
+                        <SelectItem value="text-lg">Large</SelectItem>
+                        <SelectItem value="text-xl">Extra Large</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </CardContent>
+                  <CardFooter>
+                    <p className="mb-3 text-sm text-muted-foreground">
+                      This will change the font size of the digits.
+                    </p>
+                  </CardFooter>
+                </Card>
+                <Card className="grid items-center gap-2">
+                  <CardHeader>
+                    <Label
+                      className="text-lg font-semibold flex gap-2"
+                      htmlFor="fontWeight"
+                    >
+                      Font Weight
+                    </Label>
+                  </CardHeader>
+                  <CardContent className="flex items-center">
+                    <Select
+                      value={settings.fontWeight}
+                      onValueChange={(value) =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          fontWeight: value,
+                        }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue
+                          id="fontWeight"
+                          placeholder="Select a fruit"
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="font-thin">Thin</SelectItem>
+                        <SelectItem value="font-extralight">
+                          Extra Light
+                        </SelectItem>
+                        <SelectItem value="font-light">Light</SelectItem>
+                        <SelectItem value="font-normal">Normal</SelectItem>
+                        <SelectItem value="font-medium">Medium</SelectItem>
+                        <SelectItem value="font-semibold">Semi-bold</SelectItem>
+                        <SelectItem value="font-bold">Bold</SelectItem>
+                        <SelectItem value="font-extrabold">
+                          Extra Bold
+                        </SelectItem>
+                        <SelectItem value="font-black">Black</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </CardContent>
+                  <CardFooter>
+                    <p className="mb-3 text-sm text-muted-foreground">
+                      This will change the font weight of the digits.
+                    </p>
+                  </CardFooter>
+                </Card>
+              </div>
+              <DialogFooter>
+                <Button onClick={reset} variant="secondary">
+                  Reset
+                </Button>
+                <DialogClose asChild>
+                  <Button>Save changes</Button>
+                </DialogClose>
+              </DialogFooter>
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* <Dialog
         open={isOpen}
         onClose={() => setIsOpen(false)}
         className="overflow-y-auto overflow-x-hidden h-full bg-slate-950/50 fixed top-0 right-0 left-0 z-50 grid place-items-center w-full md:inset-0 max-h-full"
@@ -268,7 +509,7 @@ export default function SettingsModal() {
             </div>
           </div>
         </Dialog.Panel>
-      </Dialog>
+      </Dialog> */}
     </div>
   );
 }

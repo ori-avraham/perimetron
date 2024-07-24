@@ -11,7 +11,7 @@ export default function Digits() {
   const { settings } = useSettings();
   return (
     <div
-      className={`pb-[96px] text-center md:text-start break-words ${settings.fontSize} ${settings.font} ${settings.fontWeight}`}
+      className={`pb-[120px] max-w-7xl mx-auto text-center md:text-start break-words ${settings.fontSize} ${settings.font} ${settings.fontWeight}`}
     >
       <div>π = 3.</div>
       <div className="break-words">
