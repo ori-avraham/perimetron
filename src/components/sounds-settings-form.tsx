@@ -8,19 +8,39 @@ import {
 import { Label } from "./ui/label";
 import { useSettings } from "@/hooks/use-settings";
 import NoteSelect from "./note-select";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
+import InstrumentSelect from "./instrument-select";
 
 export default function SoundsSettingsForm() {
   const { soundsSettings, setSoundsSettings } = useSettings();
 
   return (
     <form name="sounds-settings-form" className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <Label
+              htmlFor="instrument"
+              className="text-lg font-semibold flex gap-2"
+            >
+              Instrument
+            </Label>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <InstrumentSelect
+            id="instrument"
+            value={soundsSettings.instrument}
+            setValue={(value) =>
+              setSoundsSettings((prev) => ({ ...prev, instrument: value }))
+            }
+          />
+        </CardContent>
+        <CardFooter>
+          <p className="mb-3 text-sm text-muted-foreground">
+            Select an instrument to produce the sound.
+          </p>
+        </CardFooter>
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle className="text-lg font-semibold flex gap-2">
@@ -49,87 +69,6 @@ export default function SoundsSettingsForm() {
         <CardFooter>
           <p className="mb-3 text-sm text-muted-foreground">
             Change the sound (note) assigned to each of the digits.
-          </p>
-        </CardFooter>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Label
-              htmlFor="oscillator"
-              className="text-lg font-semibold flex gap-2"
-            >
-              Oscillator
-            </Label>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Select
-            value={soundsSettings.oscillator}
-            onValueChange={(value) =>
-              setSoundsSettings((prev) => ({
-                ...prev,
-                oscillator: value as OscillatorType,
-              }))
-            }
-          >
-            <SelectTrigger id="oscillator">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="sine">Sine</SelectItem>
-              <SelectItem value="square">Square</SelectItem>
-              <SelectItem value="sawtooth">Sawtooth</SelectItem>
-              <SelectItem value="triangle">Triangle</SelectItem>
-            </SelectContent>
-          </Select>
-        </CardContent>
-        <CardFooter>
-          <p className="mb-3 text-sm text-muted-foreground">
-            Change the oscillator value of the sound.
-          </p>
-        </CardFooter>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Label
-              htmlFor="filter"
-              className="text-lg font-semibold flex gap-2"
-            >
-              Filter
-            </Label>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Select
-            value={soundsSettings.filter}
-            onValueChange={(value) =>
-              setSoundsSettings((prev) => ({
-                ...prev,
-                filter: value as BiquadFilterType,
-              }))
-            }
-          >
-            <SelectTrigger id="filter">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">None</SelectItem>
-              <SelectItem value="lowpass">Sine</SelectItem>
-              <SelectItem value="highpass">Highpass</SelectItem>
-              <SelectItem value="bandpass">Bandpass</SelectItem>
-              <SelectItem value="lowshelf">Lowshelf</SelectItem>
-              <SelectItem value="highshelf">Highshelf </SelectItem>
-              <SelectItem value="peaking">Peaking</SelectItem>
-              <SelectItem value="notch">Notch</SelectItem>
-              <SelectItem value="allpass">Allpass</SelectItem>
-            </SelectContent>
-          </Select>
-        </CardContent>
-        <CardFooter>
-          <p className="mb-3 text-sm text-muted-foreground">
-            Change the oscillator value of the sound.
           </p>
         </CardFooter>
       </Card>

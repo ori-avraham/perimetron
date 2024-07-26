@@ -52,21 +52,25 @@ export const DigitsProvider: React.FC<React.PropsWithChildren> = ({
   const generator = useRef(piGenerator());
   const intervalId = useRef<number>(0);
   const { generalSettings } = useSettings();
+  const isFirstDigit = useRef(true);
 
   const updateDigits = useCallback(() => {
     const nextDigit = generator.current.next().value;
     if (nextDigit !== undefined) {
-      setDigits((prev) => prev + String(nextDigit));
+      if (isFirstDigit.current) {
+        isFirstDigit.current = false;
+        // Skip the first digit (3)
+      } else {
+        setDigits((prev) => prev + String(nextDigit));
+      }
     }
   }, []);
 
   const reset = useCallback(() => {
     setDigits("");
     generator.current = piGenerator();
-    if (isPlaying) {
-      generator.current.next(); // Skip first digit
-    }
-  }, [isPlaying]);
+    isFirstDigit.current = true;
+  }, []);
 
   useEffect(() => {
     if (isPlaying) {

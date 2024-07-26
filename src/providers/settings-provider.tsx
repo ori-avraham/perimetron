@@ -45,8 +45,7 @@ type SoundMap = Record<string, string>;
 
 interface SoundsSettings {
   soundMap: SoundMap;
-  oscillator: OscillatorType;
-  filter: BiquadFilterType | "none";
+  instrument: string;
 }
 
 const defaultGeneralSettings: GeneralSettings = {
@@ -91,8 +90,7 @@ const defaultSoundsSettings: SoundsSettings = {
     8: "D5",
     9: "E5",
   },
-  oscillator: "sine",
-  filter: "none",
+  instrument: "accordion",
 };
 
 export const SettingsContext = createContext<SettingsContextType | null>(null);

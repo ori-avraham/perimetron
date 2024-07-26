@@ -5,9 +5,16 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
+import { Soundfont, CacheStorage } from "smplr"; // needs to be a url
+
 import { useSettings } from "@/hooks/use-settings";
-import { notes } from "@/constants/notes";
 import { useDigits } from "./digits-provider";
+
+declare global {
+  interface Window {
+    webkitAudioContext: typeof AudioContext;
+  }
+}
 
 interface SoundsContextType {
   playSound: (digit: string) => void;
@@ -15,64 +22,52 @@ interface SoundsContextType {
 
 const SoundsContext = createContext<SoundsContextType | null>(null);
 
-const noteToFrequency = (note: string) => notes[note] || 0;
-
 export const SoundsProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
   const audioContext = useRef<AudioContext | null>(null);
   const { generalSettings, soundsSettings } = useSettings();
   const { digits, isPlaying } = useDigits();
+  const instrument = useRef<Soundfont | null>(null);
 
   const playNote = useCallback(
-    (
-      audioContext: AudioContext,
-      note: string,
-      startTime: number,
-      duration: number
-    ) => {
-      const frequency = noteToFrequency(note);
-      if (
-        !frequency ||
-        !Number.isFinite(startTime) ||
-        !Number.isFinite(duration)
-      ) {
-        console.error("Invalid parameters:", {
-          note,
-          frequency,
-          startTime,
-          duration,
-        });
-        return;
-      }
-
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      const filter = audioContext.createBiquadFilter();
-
-      oscillator.connect(filter);
-      filter.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-
-      oscillator.type = soundsSettings.oscillator;
-      oscillator.frequency.setValueAtTime(frequency, startTime);
-      gainNode.gain.setValueAtTime(1, startTime);
-
-      oscillator.start(startTime);
-      oscillator.stop(startTime + duration);
-      if (soundsSettings.filter !== "none") {
-        filter.type = soundsSettings.filter;
-        filter.frequency.setValueAtTime(1500, startTime);
-      }
-
-      gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+    (note: string, currentTime: number, duration: number) => {
+      instrument.current?.start({
+        note: note,
+        time: currentTime,
+        duration,
+      });
     },
-    [soundsSettings]
+    []
+  );
+
+  const playSound = useCallback(
+    (digit: string) => {
+      if (
+        generalSettings.sounds &&
+        audioContext.current &&
+        instrument.current
+      ) {
+        const note = soundsSettings.soundMap[parseInt(digit)];
+        if (note) {
+          const interval = generalSettings.interval / 1000;
+          const currentTime = audioContext.current.currentTime;
+          playNote(note, currentTime, interval);
+        }
+      }
+    },
+    [
+      generalSettings.sounds,
+      generalSettings.interval,
+      soundsSettings.soundMap,
+      playNote,
+    ]
   );
 
   useEffect(() => {
     if (!audioContext.current) {
-      audioContext.current = new window.AudioContext();
+      audioContext.current =
+        new window.AudioContext() || new window.webkitAudioContext();
     }
     return () => {
       audioContext.current?.close();
@@ -80,26 +75,25 @@ export const SoundsProvider: React.FC<React.PropsWithChildren> = ({
   }, []);
 
   useEffect(() => {
-    if (isPlaying && audioContext.current?.state === "suspended") {
+    const loadInstrument = async () => {
+      if (audioContext.current) {
+        const storage = new CacheStorage();
+        instrument.current = new Soundfont(audioContext.current, {
+          instrument: soundsSettings.instrument,
+          storage,
+        });
+      }
+    };
+    loadInstrument();
+  }, [soundsSettings.instrument]);
+
+  useEffect(() => {
+    if (isPlaying && audioContext.current) {
       audioContext.current.resume();
     } else if (!isPlaying && audioContext.current?.state === "running") {
       audioContext.current.suspend();
     }
   }, [isPlaying]);
-
-  const playSound = useCallback(
-    (digit: string) => {
-      if (generalSettings.sounds && audioContext.current) {
-        const note = soundsSettings.soundMap[parseInt(digit)];
-        if (note) {
-          const interval = generalSettings.interval / 1000;
-          const currentTime = audioContext.current.currentTime;
-          playNote(audioContext.current, note, currentTime, interval);
-        }
-      }
-    },
-    [generalSettings.sounds, generalSettings.interval]
-  );
 
   useEffect(() => {
     if (isPlaying && digits.length > 0) {
